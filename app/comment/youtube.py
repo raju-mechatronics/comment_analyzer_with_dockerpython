@@ -19,6 +19,7 @@ class Comment:
     publishedAt: str
     channelId: str
     replies: List["Comment"]
+
     def parse_in_json(self):
         replies = []
         if self.replies:
@@ -35,7 +36,8 @@ class Comment:
     def parse_from_json(obj: dict) -> "Comment":
         replies = []
         if obj.get('replies'):
-            replies = [Comment.parse_from_json(reply) for reply in obj.get('replies') if reply is not None]
+            replies = [Comment.parse_from_json(reply) for reply in obj.get(
+                'replies') if reply is not None]
         return Comment(text=obj['text'], publishedAt=obj['publishedAt'], likeCount=obj['likeCount'],
                        channelId=obj['channelId'],
                        replies=replies)
@@ -56,7 +58,8 @@ def get_comment_from_obj(obj: dict) -> Comment:
     toplevel = obj.get('snippet').get('topLevelComment')
     replies = obj.get('replies', {}).get('comments', [])
     comment = make_comment_from_snippet(toplevel)
-    comment.replies = [make_comment_from_snippet(reply) for reply in replies if reply]
+    comment.replies = [make_comment_from_snippet(
+        reply) for reply in replies if reply]
     return comment
 
 
@@ -66,7 +69,6 @@ def get_comments(videoId: str, maxPull=1000) -> List[Comment]:
         part="snippet",
         videoId=videoId,
         maxResults=100,
-        order="relevance"
     ).execute()
     allComment: List[Comment] = []
     for comment in commentResponse.get("items"):
@@ -75,10 +77,9 @@ def get_comments(videoId: str, maxPull=1000) -> List[Comment]:
     while commentResponse.get('nextPageToken', False) and pulled < int(maxPull / 100):
         pulled += 1
         commentResponse = youtube.commentThreads().list(
-            part="snippet,replies",
+            part="snippet",
             videoId=videoId,
             maxResults=100,
-            order="relevance",
             pageToken=commentResponse.get('nextPageToken')
         ).execute()
         for comment in commentResponse.get("items"):
@@ -88,7 +89,8 @@ def get_comments(videoId: str, maxPull=1000) -> List[Comment]:
 
 class YoutubeComment:
     def __init__(self, videoId: str, maxPull=1000):
-        youtubeComment = db.query(YoutubeCommentModel).filter(YoutubeCommentModel.videoId == videoId).first()
+        youtubeComment = db.query(YoutubeCommentModel).filter(
+            YoutubeCommentModel.videoId == videoId).first()
         if youtubeComment is None:
             data = get_comments(videoId, maxPull)
             youtubeComment = YoutubeCommentModel(videoId=videoId,
@@ -96,14 +98,20 @@ class YoutubeComment:
             db.add(youtubeComment)
             db.commit()
         self.videoId = videoId
-        self.comments = [Comment.parse_from_json(comment) for comment in json.loads(youtubeComment.comments)]
+        self.comments = [Comment.parse_from_json(
+            comment) for comment in json.loads(youtubeComment.comments)]
 
     def get_result(self):
-        result = db.query(YoutubeResultModel).filter(YoutubeResultModel.videoId == self.videoId).first()
+        print("hi")
+        result = db.query(YoutubeResultModel).filter(
+            YoutubeResultModel.videoId == self.videoId).first()
+        print(result, self.comments)
         if result is None:
             comments = ([comment.text for comment in self.comments])
             res = count_comment_type(comments)
-            result = YoutubeResultModel(videoId=self.videoId, result=json.dumps(res))
+            result = YoutubeResultModel(
+                videoId=self.videoId, result=json.dumps(res)
+            )
             db.add(result)
             db.commit()
         return json.loads(result.result)
