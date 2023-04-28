@@ -14,3 +14,5 @@ protobuf
 sentencepiece
 python-dotenv
 google-api-python-client
+openai
+youtube-transcript-api
