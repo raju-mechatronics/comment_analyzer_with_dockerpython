@@ -42,7 +42,8 @@ async def videoSummery(videoId: str):
             if summery is None:
                 return {"this video has no caption"}
             return summery
-        except:
+        except Exception as e:
+            print(e)
             return {"message": "Please provide a valid videoId"}
 
 

@@ -28,13 +28,12 @@ def dump_json(data, filename):
         json.dump(data, f, indent=4)
 
 
-# make csv file zipping two list
-
-
 def make_csv_file(list1, list2, list3, filename):
-    with open(filename, "w") as f:
-        for i in range(len(list1)):
-            f.write(f"{list1[i]},{list2[i]},{list3[i]}\n")
+    # with open(filename, "w") as f:
+    result = []
+    for i in range(len(list1)):
+        result.append(f"{list1[i]},{list2[i]},{list3[i]}\n")
+    return "".join(result)
 
 
 def count_comment_type(comments: List[str]):
@@ -59,8 +58,14 @@ def count_comment_type(comments: List[str]):
         else:
             result_sentiment[item["label"]] = 1
     result_sentiment = convert_dict_in_percentage(result_sentiment)
+    csv_text = ""
+    try:
+        csv_text = make_csv_file(list1, list2, list3, "result.csv")
+    except Exception as e:
+        print(e)
     return {
         "classifier": result_classifier,
         "sentiment": result_sentiment,
         "comment_count": total,
+        "result_view": csv_text,
     }
