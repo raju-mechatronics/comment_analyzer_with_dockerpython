@@ -136,3 +136,4 @@ dmypy.json
 # vs code
 .vscode/
 app/scratch.py
+app/result.csv
