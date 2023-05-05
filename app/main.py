@@ -12,7 +12,6 @@ from database import models
 
 from fastapi import FastAPI
 from comment.youtube import YoutubeComment
-from huggignface import count_comment_type
 import uvicorn
 
 models.Base.metadata.create_all(engine)

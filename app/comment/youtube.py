@@ -11,6 +11,8 @@ from database.engine import dbSession as db
 
 from huggignface import count_comment_type
 
+from app.comment.translate import translate
+
 
 @dataclass
 class Comment:
@@ -137,7 +139,8 @@ class YoutubeComment:
             .first()
         )
         if result is None:
-            comments = [comment.text for comment in self.comments]
+            comments = translate([comment.text for comment in self.comments])
+            print(comments)
             res = count_comment_type(comments)
             result = YoutubeResultModel(videoId=self.videoId, result=json.dumps(res))
             db.add(result)
