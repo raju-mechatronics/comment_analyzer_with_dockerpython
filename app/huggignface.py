@@ -5,12 +5,14 @@ from typing import List
 
 # for sentiment analysis
 model_path = "cardiffnlp/twitter-xlm-roberta-base-sentiment"
-sentiment_task = pipeline("sentiment-analysis", model=model_path, tokenizer=model_path)
+sentiment_task = pipeline(
+    "sentiment-analysis", model=model_path, tokenizer=model_path, max_length=512
+)
 
 
 # for emotion
 model_id = "SamLowe/roberta-base-go_emotions"
-classifier = pipeline("text-classification", model=model_id)
+classifier = pipeline("text-classification", model=model_id, tokenizer=model_id)
 
 
 def convert_dict_in_percentage(result: dict):
@@ -37,9 +39,8 @@ def make_csv_file(list1, list2, list3, filename):
 
 
 def count_comment_type(comments: List[str]):
-    print(comments, len(comments))
     total = len(comments)
-    classifier_result = classifier(comments)
+    classifier_result = classifier(comments, truncation=True, padding=True)
     list1 = comments
     list2 = [a.get("label", "err") for a in classifier_result]
     result_classifier = {}
@@ -49,7 +50,7 @@ def count_comment_type(comments: List[str]):
         else:
             result_classifier[item["label"]] = 1
     result_classifier = convert_dict_in_percentage(result_classifier)
-    sentiment_result = sentiment_task(comments)
+    sentiment_result = sentiment_task(comments, truncation=True, padding=True)
     list3 = [a.get("label", "err") for a in sentiment_result]
     result_sentiment = {}
     for item in sentiment_result:
